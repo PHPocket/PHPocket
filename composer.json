@@ -1,0 +1,21 @@
+{
+    "name": "phppocket/phppocket",
+    "description": "Lightweight framework with weak-references",
+    "keywords": ["php", "framework"],
+    "type": "library",
+    "version": "0.1",
+    "license" : "MIT",
+    "require": {
+        "php": ">=5.3",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "3.7.*",
+        "squizlabs/php_codesniffer": "1.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Detach\\": "src/"
+        }
+    }
+}

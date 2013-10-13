@@ -1,0 +1,7 @@
+<phpunit bootstrap="bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="Detach Framework Test Suite">
+            <directory>./unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
