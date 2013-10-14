@@ -3,7 +3,9 @@
 namespace PHPocket\Data\ActiveRecord;
 
 use \PDO as Provider;
+use PHPocket\Common\EqualsInterface;
 use PHPocket\Type\ID;
+use Traversable;
 
 /**
  * Lightweight ActiveRecord for PDO extension
@@ -11,7 +13,7 @@ use PHPocket\Type\ID;
  *
  * @package PHPocket\Data\ActiveRecord
  */
-class PDO implements ActiveRecordInterface
+class PDO implements \IteratorAggregate, ActiveRecordInterface
 {
     /**
      * @var Provider
@@ -131,17 +133,132 @@ class PDO implements ActiveRecordInterface
     }
 
     /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Retrieve an external iterator
+     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * <b>Traversable</b>
+     */
+    public function getIterator()
+    {
+
+        return new \ArrayIterator(clone $this->_data);
+    }
+
+
+    /**
      * Returns true, if data, represented by ActiveRecord is
      * mapped to existent database entry
      * For example, for non-existent or new entries this method
      * must return false
      *
      * @return boolean
+     *
+     * @throws \BadMethodCallException
      */
     public function exists()
     {
+        if ($this->getID()->isEmpty()) {
+            throw new \BadMethodCallException('Active record is empty');
+        }
         return ! $this->getID()->isSpecial();
     }
+
+    /**
+     * Returns number of headers inside
+     *
+     * @return int
+     */
+    public function count()
+    {
+        if ($this->_data === null) return 0;
+        return count($this->_data);
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Whether a offset exists
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return boolean true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     *
+     * @throws \BadMethodCallException
+     */
+    public function offsetExists($offset)
+    {
+        if ($this->getID()->isEmpty()) {
+            throw new \BadMethodCallException('Active record is empty');
+        }
+        return array_key_exists($offset, $this->_data);
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Offset to unset
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+     * @param mixed $offset <p>
+     * The offset to unset.
+     * </p>
+     * @return void
+     */
+    public function offsetUnset($offset)
+    {
+        if (!$this->offsetExists($offset)) {
+            return;
+        }
+        unset($this->_data[$offset]);
+        if (isset($this->_changes[$offset])) {
+            unset($this->_changes[$offset]);
+        }
+    }
+
+    /**
+     * Returns true if collection contains
+     * provided value
+     *
+     * @param mixed $value
+     * @return bool
+     *
+     * @throws \BadMethodCallException
+     */
+    public function containsValue($value)
+    {
+        if ($this->getID()->isEmpty()) {
+            throw new \BadMethodCallException('Active record is empty');
+        }
+        foreach ($this->_data as $k => $v){
+            if ($v instanceof EqualsInterface) {
+                if ($v->equals($value)) {
+                    return true;
+                }
+            } elseif ($value instanceof EqualsInterface) {
+                if ($value->equals($v)) {
+                    return true;
+                }
+            } elseif ($v == $value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if collection does not contain
+     * any elements
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        if ($this->getID()->isEmpty()) return true;
+        return $this->_data == null || $this->count() == 0;
+    }
+
 
     /**
      * Returns ID if current object
@@ -179,12 +296,9 @@ class PDO implements ActiveRecordInterface
      *
      * @throws \Exception
      */
-    public function getAttribute($key)
+    public function offsetGet($key)
     {
-        if ($this->getID()->isEmpty()) {
-            throw new \BadMethodCallException('Active record is empty');
-        }
-        if (!array_key_exists($key, $this->_data)) {
+        if (!$this->offsetExists($key)) {
             throw new \InvalidArgumentException(
                 $key . ' not found in active record'
             );
@@ -202,7 +316,7 @@ class PDO implements ActiveRecordInterface
      *
      * @throws \Exception
      */
-    public function setAttribute($key, $value)
+    public function offsetSet($key, $value)
     {
         if ($this->getID()->isEmpty()) {
             throw new \BadMethodCallException('Active record is empty');
