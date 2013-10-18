@@ -6,10 +6,17 @@ use PHPocket\Common\CollectionInterface;
 use PHPocket\Common\EqualsInterface;
 use Traversable;
 
+/**
+ * Special associative array wrapper, allowing to use objects
+ * as array keys
+ *
+ *
+ * @package PHPocket\Type
+ */
 class ObjectMap implements
     \IteratorAggregate,
     CustomTypeInterface,
-    EqualsInterface
+    CollectionInterface
 {
 
     /**
@@ -79,13 +86,46 @@ class ObjectMap implements
         if ($this->count() != $object->count()) {
             return false;
         }
-
         throw new \Exception('Not implemented');
     }
 
+    /**
+     * Returns number of elements inside collection
+     *
+     * @return int
+     */
     public function count()
     {
         return count($this->_keys);
     }
+
+    /**
+     * Returns true if collection does not contain
+     * any elements
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return $this->count() === 0;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Whether a offset exists
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+     * @param mixed $offset <p>
+     * An offset to check for.
+     * </p>
+     * @return boolean true on success or false on failure.
+     * </p>
+     * <p>
+     * The return value will be casted to boolean if non-boolean was returned.
+     */
+    public function offsetExists($offset)
+    {
+        return in_array($offset, $this->_keys);
+    }
+
 
 }
