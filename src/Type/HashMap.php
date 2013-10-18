@@ -25,6 +25,14 @@ class HashMap implements
      */
     protected $_data = null;
 
+
+    /**
+     * Constructor
+     *
+     * @param array|null $initialData
+     *
+     * @throws \InvalidArgumentException
+     */
     public function __construct($initialData = null)
     {
         if ($initialData !== null) {

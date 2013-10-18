@@ -2,33 +2,13 @@
 
 namespace PHPocket\Data\ActiveRecord;
 
+use PHPocket\Common\CollectionInterface;
 use PHPocket\Common\EqualsInterface;
 use PHPocket\Common\IDInterface;
 use PHPocket\Type\ID;
 
-interface ActiveRecordInterface extends IDInterface, EqualsInterface
+interface ActiveRecordInterface extends IDInterface, EqualsInterface, CollectionInterface
 {
-    /**
-     * Sets the attribute of ActiveRecord
-     *
-     * @param string $key
-     * @param mixed  $value
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function setAttribute($key, $value);
-
-    /**
-     * Gets the attribute of ActiveRecord
-     *
-     * @param string $key
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function getAttribute($key);
-
     /**
      * Save the changes (not all fields, just changes)
      *

@@ -23,14 +23,14 @@ class PDOTest extends \PHPUnit_Framework_TestCase
         $x2 = PDO::load(new ID(2), $this->_pdo, 'User');
         $x3 = PDO::load(new ID('foo'), $this->_pdo, 'StringKey', 'key');
         $x4 = PDO::load(new ID('hash'), $this->_pdo, 'StringKey', 'key');
-        $this->assertEquals('User one', $x1->getAttribute('name'));
-        $this->assertEquals(22, $x1->getAttribute('age'));
-        $this->assertEquals(0.22, $x1->getAttribute('rating'));
+        $this->assertEquals('User one', $x1->offsetGet('name'));
+        $this->assertEquals(22, $x1->offsetGet('age'));
+        $this->assertEquals(0.22, $x1->offsetGet('rating'));
 
-        $this->assertEquals(2342.111, $x2->getAttribute('rating'));
+        $this->assertEquals(2342.111, $x2->offsetGet('rating'));
 
-        $this->assertEquals(123, $x3->getAttribute('value'));
-        $this->assertEquals(555, $x4->getAttribute('value'));
+        $this->assertEquals(123, $x3->offsetGet('value'));
+        $this->assertEquals(555, $x4->offsetGet('value'));
 
         $x = PDO::load(new ID(555), $this->_pdo, 'User');
         $this->assertTrue($x->getID()->isEmpty());
@@ -47,33 +47,33 @@ class PDOTest extends \PHPUnit_Framework_TestCase
     {
         $x = PDO::load(new ID(1), $this->_pdo, 'User');
         try {
-            $x->getAttribute('notExistant');
+            $x->offsetGet('notExistant');
             $this->fail();
         } catch (\InvalidArgumentException $e){
             $this->assertTrue(true);
         }
         try {
-            $x->setAttribute('notExistant', 'some');
+            $x->offsetSet('notExistant', 'some');
             $this->fail();
         } catch (\InvalidArgumentException $e){
             $this->assertTrue(true);
         }
 
-        $x->setAttribute('address', null);
-        $this->assertNull($x->getAttribute('address'));
+        $x->offsetSet('address', null);
+        $this->assertNull($x->offsetGet('address'));
         $x->save();
         $x = PDO::load(new ID(1), $this->_pdo, 'User');
-        $this->assertNull($x->getAttribute('address'));
+        $this->assertNull($x->offsetGet('address'));
 
         $y = PDO::load(new ID(555), $this->_pdo, 'User');
         try {
-            $y->getAttribute('age');
+            $y->offsetGet('age');
             $this->fail();
         } catch (\BadMethodCallException $e){
             $this->assertTrue(true);
         }
         try {
-            $y->setAttribute('age', 'some');
+            $y->offsetSet('age', 'some');
             $this->fail();
         } catch (\BadMethodCallException $e){
             $this->assertTrue(true);
@@ -83,40 +83,40 @@ class PDOTest extends \PHPUnit_Framework_TestCase
     public function testCreate()
     {
         $x = PDO::createNew($this->_pdo, 'User');
-        $x->setAttribute('name', 'Three');
-        $x->setAttribute('age', 26);
+        $x->offsetSet('name', 'Three');
+        $x->offsetSet('age', 26);
         $x->save();
         $this->assertEquals(3, $x->getID()->getInt());
 
         $y = PDO::load($x->getID(), $this->_pdo, 'User');
-        $this->assertEquals('Three', $y->getAttribute('name'));
-        $this->assertEquals(26, $y->getAttribute('age'));
+        $this->assertEquals('Three', $y->offsetGet('name'));
+        $this->assertEquals(26, $y->offsetGet('age'));
 
         $x = PDO::createNew($this->_pdo, 'StringKey', 'key');
-        $x->setAttribute('key', 'hashXXX');
-        $x->setAttribute('value', 2);
+        $x->offsetSet('key', 'hashXXX');
+        $x->offsetSet('value', 2);
         $x->save();
         $this->assertEquals('hashXXX', (string) $x->getID());
 
         $y = PDO::load($x->getID(), $this->_pdo, 'StringKey', 'key');
-        $this->assertEquals(2, $y->getAttribute('value'));
+        $this->assertEquals(2, $y->offsetGet('value'));
     }
 
     public function testUpdate()
     {
         $x = PDO::load(new ID(2), $this->_pdo, 'User');
-        $x->setAttribute('name', 'Replaced name');
+        $x->offsetSet('name', 'Replaced name');
         $y = PDO::load(new ID(2), $this->_pdo, 'User');
-        $this->assertNotEquals('Replaced name', $y->getAttribute('name'));
+        $this->assertNotEquals('Replaced name', $y->offsetGet('name'));
         $x->save();
         $y = PDO::load(new ID(2), $this->_pdo, 'User');
-        $this->assertEquals('Replaced name', $y->getAttribute('name'));
+        $this->assertEquals('Replaced name', $y->offsetGet('name'));
 
         $x = PDO::load(new ID('hash'), $this->_pdo, 'StringKey', 'key');
-        $x->setAttribute('value', 1983);
+        $x->offsetSet('value', 1983);
         $x->save();
         $y = PDO::load(new ID('hash'), $this->_pdo, 'StringKey', 'key');
-        $this->assertEquals(1983, $y->getAttribute('value'));
+        $this->assertEquals(1983, $y->offsetGet('value'));
 
     }
 
@@ -124,12 +124,12 @@ class PDOTest extends \PHPUnit_Framework_TestCase
     {
         $x = PDO::load(new ID(2), $this->_pdo, 'User');
         $this->assertFalse($x->getID()->isSpecial());
-        $this->assertEquals(44, $x->getAttribute('age'));
+        $this->assertEquals(44, $x->offsetGet('age'));
 
         $x->delete();
         $this->assertTrue($x->getID()->isSpecial());
         try{
-            $x->getAttribute('age');
+            $x->offsetGet('age');
             $this->fail();
         } catch( \BadMethodCallException $e){
             $this->assertTrue(true);
